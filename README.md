@@ -4,8 +4,7 @@ Discordで大量のロールを扱う場合に、ロールのグループを作�
 ## Features
 |コマンド|機能の説明|
 |:----|:----|
-|`/settings`|現在設定を表示|
-|`/role list`|サーバーのすべてのロールのリストを表示|
+|`/role list <parent_role>`|ロールのリストを表示|
 |`/role members [role]`|特定のロールが付与されているメンバーのリストを表示|
 |`/group new [name] <flexible>`|ロールグループを作成する。<br>`flexible`が`true`の時、flexibleモードでロールグループを作成する。|
 |`/group create [name] <flexible>`|ロールグループを作成し、既存のロールを追加する<br>同様に`flexible`が`true`の時、flexibleモードでロールグループを作成する。|
