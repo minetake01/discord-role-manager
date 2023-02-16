@@ -37,6 +37,7 @@ async fn main(){
     let options = poise::FrameworkOptions {
         commands: vec![
             commands::help::help(),
+            commands::role::role(),
             commands::group::group()
         ],
         event_handler: |ctx, event, _framework, _data| {
