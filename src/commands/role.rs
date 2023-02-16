@@ -32,8 +32,8 @@ pub async fn list(
 )]
 pub async fn members(
     ctx: Context<'_>,
-    #[description = "Roles to display"]
-    #[description_localized("ja", "ロールを表示")]
+    #[description = "Roles displaying members"]
+    #[description_localized("ja", "メンバーを表示するロール")]
     role: Role,
 ) -> Result<(), Error> {
     Ok(())
