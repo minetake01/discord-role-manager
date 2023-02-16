@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize, de::Visitor};
 
 //GuildIdのDeserialize実装はU64Visitorで文字列から直接デシリアライズできないため、VisitorでDeserializeを独自実装する。
 #[derive(Hash, PartialEq, Eq, Debug, Serialize)]
-pub struct WrappedGuildId (u64);
+pub struct WrappedGuildId (pub u64);
 
 struct GuildIdVisitor;
 
@@ -38,7 +38,7 @@ impl From<GuildId> for WrappedGuildId {
 
 //GuildIdと同じく、RoleIdのDeserialize実装はU64Visitorで文字列から直接デシリアライズできないため、VisitorでDeserializeを独自実装する。
 #[derive(Hash, PartialEq, Eq, Debug, Serialize)]
-pub struct WrappedRoleId (u64);
+pub struct WrappedRoleId (pub u64);
 
 struct RoleIdVisitor;
 
@@ -72,7 +72,7 @@ impl From<RoleId> for WrappedRoleId {
 
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct WrappedPermissions (u64);
+pub struct WrappedPermissions (pub u64);
 
 impl From<Permissions> for WrappedPermissions {
     fn from(value: Permissions) -> Self {
