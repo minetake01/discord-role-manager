@@ -17,7 +17,7 @@ impl<'de> Visitor<'de> for GuildIdVisitor {
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
         where
             E: serde::de::Error, {
-        Ok(WrappedGuildId(v.parse().unwrap()))
+        v.parse().map(|e| WrappedGuildId(e)).map_err(serde::de::Error::custom)
     }
 }
 
@@ -52,7 +52,7 @@ impl<'de> Visitor<'de> for RoleIdVisitor {
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
         where
             E: serde::de::Error, {
-        Ok(WrappedRoleId(v.parse().unwrap()))
+        v.parse().map(|e| WrappedRoleId(e)).map_err(serde::de::Error::custom)
     }
 }
 
