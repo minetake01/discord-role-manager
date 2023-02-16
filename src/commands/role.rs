@@ -1,6 +1,8 @@
 use poise::serenity_prelude::{Error, Role};
 
-type Context<'a> = poise::Context<'a, (), Error>;
+use crate::Data;
+
+type Context<'a> = poise::Context<'a, Data, Error>;
 
 #[poise::command(
     slash_command,

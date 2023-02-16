@@ -1,8 +1,29 @@
 mod commands;
+mod structs;
+mod serializer;
 
-use std::env;
+use std::{env, ops::Deref};
 
 use poise::serenity_prelude::*;
+use structs::RolesData;
+use tokio::{fs, io::{BufWriter, AsyncWriteExt}};
+
+pub struct Data {
+    roles: Mutex<RolesData>
+}
+
+impl Data {
+    pub async fn save(&self) -> Result<()> {
+        let roles_data = self.roles.lock().await;
+        
+        let file = fs::File::create("db/roles.toml").await?;
+        let mut writer = BufWriter::new(file);
+        let toml = toml::to_string(&roles_data.deref()).unwrap();
+        writer.write_all(toml.as_bytes()).await?;
+        writer.flush().await?;
+        Ok(())
+    }
+}
 
 #[tokio::main]
 async fn main(){
@@ -51,16 +72,25 @@ async fn main(){
         .token(token)
         .intents(intents)
         .options(options)
-        .setup(|ctx, ready, _framework| Box::pin(async move {
+        .setup(|ctx, ready, _framework| {
             println!("{} is connected! Shard ID: {}", ready.user.name, ctx.shard_id);
 
-            poise::builtins::register_globally(&ctx.http, &[
-                commands::help::help(),
-                commands::role::role(),
-                commands::group::group(),
-            ]).await?;
-            Ok(())
-        }));
+            Box::pin(async move {
+                //Slash Commandを登録
+                poise::builtins::register_globally(&ctx.http, &[
+                    commands::help::help(),
+                    commands::role::role(),
+                    commands::group::group(),
+                ]).await?;
+
+                let file = fs::read_to_string("db/roles.toml").await?;
+                let roles_data: RolesData = toml::from_str(&file).expect("TOMLのパースに失敗しました。");
+
+                Ok(Data {
+                    roles: Mutex::new(roles_data),
+                })
+            })
+        });
 
     if let Err(err) = framework.run_autosharded().await {
         println!("An error occurred while running the client: {:?}", err)
