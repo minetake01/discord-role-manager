@@ -2,9 +2,9 @@ mod commands;
 mod structs;
 mod serializer;
 
-use std::{env, ops::Deref};
+use std::{env, ops::Deref, sync::Mutex};
 
-use poise::serenity_prelude::*;
+use poise::serenity_prelude::{Result, GatewayIntents};
 use structs::RolesData;
 use tokio::{fs, io::{BufWriter, AsyncWriteExt}};
 
@@ -14,7 +14,7 @@ pub struct Data {
 
 impl Data {
     pub async fn save(&self) -> Result<()> {
-        let roles_data = self.roles.lock().await;
+        let roles_data = self.roles.lock().unwrap();
         
         let file = fs::File::create("db/roles.toml").await?;
         let mut writer = BufWriter::new(file);
