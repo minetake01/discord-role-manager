@@ -1,6 +1,0 @@
-# テスト用仮データ
-[640463752877309962]
-1075253825411223642 = { flexible = true, permissions = 0, parent = [] }
-1075253954272841820 = { flexible = true, permissions = 0, parent = [1075253825411223642] }
-1075253727285481532 = { flexible = true, permissions = 0, parent = [1075253954272841820, 1075253825411223642] }
-1075253867597529202 = { flexible = true, permissions = 0, parent = [1075253825411223642] }

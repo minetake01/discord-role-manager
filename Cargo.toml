@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 dotenv = "0.15.0"
 serde = { version = "1.0", features = ["derive"] }
-toml = "0.7.2"
+ron = "0.8"
 poise = { version = "0.5.2", features = ["cache"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

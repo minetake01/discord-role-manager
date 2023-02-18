@@ -1,15 +1,21 @@
 use std::collections::HashMap;
 
-use poise::serenity_prelude::RoleId;
+use poise::serenity_prelude::{RoleId, GuildId, Permissions};
 use serde::{Deserialize, Serialize};
 
-use crate::serializer::{WrappedPermissions, WrappedGuildId, WrappedRoleId};
+pub type GuildMap = HashMap<GuildId, RoleMap>;
 
-pub type RolesData = HashMap<WrappedGuildId, HashMap<WrappedRoleId, RoleData>>;
+pub type RoleMap = HashMap<RoleId, RoleAttrs>;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RoleData {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RoleAttrs {
     pub flexible: bool,
-    pub permissions: WrappedPermissions,
+    pub permissions: Permissions,
+    pub edges: RoleEdges,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct RoleEdges {
     pub parent: Vec<RoleId>,
+    pub children: Vec<RoleId>,
 }

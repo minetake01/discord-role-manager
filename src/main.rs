@@ -1,25 +1,24 @@
 mod commands;
 mod structs;
-mod serializer;
 
-use std::{env, ops::Deref, sync::Mutex};
+use std::{env, sync::Mutex, ops::Deref};
 
 use poise::serenity_prelude::{Result, GatewayIntents};
-use structs::RolesData;
-use tokio::{fs, io::{BufWriter, AsyncWriteExt}};
+use structs::GuildMap;
+use tokio::{fs, io::{AsyncWriteExt, BufWriter}};
 
 pub struct Data {
-    roles: Mutex<RolesData>
+    guild_map: Mutex<GuildMap>
 }
 
 impl Data {
     pub async fn save(&self) -> Result<()> {
-        let roles_data = self.roles.lock().unwrap();
+        let guild_map = self.guild_map.lock().unwrap();
         
         let file = fs::File::create("db/roles.toml").await?;
         let mut writer = BufWriter::new(file);
-        let toml = toml::to_string(&roles_data.deref()).unwrap();
-        writer.write_all(toml.as_bytes()).await?;
+        let content = ron::ser::to_string(&guild_map.deref()).unwrap();
+        writer.write_all(content.as_bytes()).await?;
         writer.flush().await?;
         Ok(())
     }
@@ -84,11 +83,11 @@ async fn main(){
                     commands::group::group(),
                 ]).await?;
 
-                let file = fs::read_to_string("db/roles.toml").await?;
-                let roles_data: RolesData = toml::from_str(&file).expect("TOMLのパースに失敗しました。");
+                let file_content = fs::read_to_string("db/roles.ron").await?;
+                let roles_data: GuildMap = ron::from_str(&file_content).expect("RONのパースに失敗しました。");
 
                 Ok(Data {
-                    roles: Mutex::new(roles_data),
+                    guild_map: Mutex::new(roles_data),
                 })
             })
         });
