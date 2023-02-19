@@ -3,8 +3,8 @@ mod structs;
 
 use std::{env, sync::Mutex, ops::Deref};
 
-use poise::serenity_prelude::{Result, GatewayIntents};
-use structs::GuildMap;
+use poise::serenity_prelude::{Result, GatewayIntents, GuildId, RoleId};
+use structs::{GuildMap, RoleMap};
 use tokio::{fs, io::{AsyncWriteExt, BufWriter}};
 
 pub struct Data {
@@ -12,6 +12,37 @@ pub struct Data {
 }
 
 impl Data {
+    pub fn get_role_map(&self, guild_id: &GuildId) -> Option<RoleMap> {
+        self.guild_map.lock().unwrap().get(guild_id).cloned()
+    }
+
+    pub fn get_parent_role_ids(&self, guild_id: &GuildId, roles: &Vec<RoleId>) -> Vec<RoleId> {
+        let Some(role_map) = self.get_role_map(guild_id) else { return vec![] };
+        let mut role_ids: Vec<_> = roles.iter()
+            .flat_map(|role_id| {
+                let edges = role_map.get(role_id).and_then(|role_attrs| Some(role_attrs.edges.clone())).unwrap_or_default();
+                if edges.children.is_empty() {
+                    return self.get_parent_role_ids_recursive(&role_map, role_id)
+                }
+                vec![]
+            })
+            .collect();
+        
+        role_ids.sort();
+        role_ids.dedup();
+        role_ids
+    }
+
+    fn get_parent_role_ids_recursive(&self, role_map: &RoleMap, role_id: &RoleId) -> Vec<RoleId> {
+        let edges = role_map.get(role_id).and_then(|role_attrs| Some(role_attrs.edges.clone())).unwrap_or_default();
+        edges.parent.iter()
+            .flat_map(|parent_role_id| {
+                self.get_parent_role_ids_recursive(role_map, parent_role_id)
+            })
+            .chain(vec![role_id.clone()])
+            .collect()
+    }
+
     pub async fn save(&self) -> Result<()> {
         let guild_map = self.guild_map.lock().unwrap();
         
@@ -39,10 +70,23 @@ async fn main(){
             commands::role::role(),
             commands::group::group()
         ],
-        event_handler: |ctx, event, _framework, _data| {
+        event_handler: |ctx, event, _framework, data| {
             Box::pin(async move {
                 match event {
                     poise::Event::GuildMemberUpdate { old_if_available, new } => {
+                        if let Some(old) = old_if_available {
+                            if new.roles == old.roles { return Ok(()) }
+                        }
+
+                        let role_ids = data.get_parent_role_ids(&new.guild_id, &new.roles);
+
+                        let add_role_ids: Vec<_> = role_ids.iter().filter(|&x| !new.roles.contains(x)).cloned().collect();
+                        let remove_role_ids: Vec<_> = new.roles.iter().filter(|&x| !role_ids.contains(x)).cloned().collect();
+
+                        let member = &mut new.clone();
+
+                        if !add_role_ids.is_empty() { member.add_roles(&ctx.http, &add_role_ids).await?; }
+                        if !remove_role_ids.is_empty() { member.remove_roles(&ctx.http, &remove_role_ids).await?; }
                         Ok(())
                     },
                     _ => {
