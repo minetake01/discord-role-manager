@@ -20,7 +20,7 @@ impl Data {
         let Some(role_map) = self.get_role_map(guild_id) else { return vec![] };
         let mut role_ids: Vec<_> = roles.iter()
             .flat_map(|role_id| {
-                let edges = role_map.get(role_id).and_then(|role_attrs| Some(role_attrs.edges.clone())).unwrap_or_default();
+                let edges = role_map.get(role_id).map(|role_attrs| role_attrs.edges.clone()).unwrap_or_default();
                 if edges.children.is_empty() {
                     return self.get_parent_role_ids_recursive(&role_map, role_id)
                 }
@@ -34,8 +34,11 @@ impl Data {
     }
 
     fn get_parent_role_ids_recursive(&self, role_map: &RoleMap, role_id: &RoleId) -> Vec<RoleId> {
-        let edges = role_map.get(role_id).and_then(|role_attrs| Some(role_attrs.edges.clone())).unwrap_or_default();
-        edges.parent.iter()
+        role_map
+            .get(role_id).map(|role_attrs| role_attrs.edges.clone())
+            .unwrap_or_default()
+            .parent
+            .iter()
             .flat_map(|parent_role_id| {
                 self.get_parent_role_ids_recursive(role_map, parent_role_id)
             })
