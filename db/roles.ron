@@ -2,7 +2,6 @@
     GuildId(640463752877309962): {
         RoleId(1075253825411223642): RoleAttrs(
             flexible: true,
-            permissions: "1",
             edges: RoleEdges(
                 parent: [],
                 children: [
@@ -13,7 +12,6 @@
         ),
         RoleId(1075253954272841820): RoleAttrs(
             flexible: true,
-            permissions: "1",
             edges: RoleEdges(
                 parent: [
                     RoleId(1075253825411223642),
@@ -25,7 +23,6 @@
         ),
         RoleId(1075253727285481532): RoleAttrs(
             flexible: true,
-            permissions: "1",
             edges: RoleEdges(
                 parent: [
                     RoleId(1075253954272841820),
@@ -35,7 +32,6 @@
         ),
         RoleId(1075253867597529202): RoleAttrs(
             flexible: true,
-            permissions: "1",
             edges: RoleEdges(
                 parent: [
                     RoleId(1075253825411223642),
