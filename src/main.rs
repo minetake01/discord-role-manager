@@ -26,6 +26,10 @@ impl Data {
                 }
                 vec![]
             })
+            .filter(|role_id| {
+                let Some(role_attrs) = role_map.get(role_id) else { return true };
+                role_attrs.flexible || role_attrs.edges.children.is_empty()
+            })
             .collect();
         
         role_ids.sort();
@@ -35,7 +39,8 @@ impl Data {
 
     fn get_parent_role_ids_recursive(&self, role_map: &RoleMap, role_id: &RoleId) -> Vec<RoleId> {
         role_map
-            .get(role_id).map(|role_attrs| role_attrs.edges.clone())
+            .get(role_id)
+            .map(|role_attrs| role_attrs.edges.clone())
             .unwrap_or_default()
             .parent
             .iter()
